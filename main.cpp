@@ -1,3 +1,5 @@
+//https://www.geeksforgeeks.org/c-program-red-black-tree-insertion/
+
 #include <iostream>
 #include <cstring>
 #include <fstream>
@@ -34,9 +36,9 @@ void ADD(Node* &head, Node* &current, Node*& previous, int value);
 void FADD(Node* &head);
 void PRINT(Node* root, Trunk *previous, bool isLeft);
 
-void BALANCE();
-void rotateLeft();
-void rotateRight();
+void BALANCE(Node* &head, Node* &current);
+void rotateLeft(Node* &head, Node* &current);
+void rotateRight(Node* &head, Node* &current);
 
 int main() {
   cout << "Red-Black Tree: Insertion" << endl << endl;
@@ -121,7 +123,7 @@ void ADD(Node* &head, Node* &current, Node*& previous, int value) {
   }
 }
 
-void FAdd(Node* &head) {
+void FADD(Node* &head) {
   char input[10000];
   char fileName[100];
   int modify[100];
@@ -227,4 +229,66 @@ void PARSE(char* in, int* modify, int& count) { //Parse function, takes in input
             }
         }
     }
+}
+
+void BALANCE(Node* &head, Node* &current) {
+  Node* parent = NULL;
+  Node* grandParent= NULL;
+  while ((current != head) && (current->getColor() != 0) && ((current->getParent())->getColor() == 1)) {
+    parent = current->getParent();
+    grandParent = parent->getParent();
+    //Case A: Parent = left child of grandparent
+    if (parent == grandParent->getLeft()) {
+      Node* uncle = grandParent->getRight();
+      //Case 1A: Uncle = red, only recolor
+      if (uncle != NULL && uncle->getColor() != 0) {
+	grandParent->setColor(1); //Red
+	parent->setColor(0); //Black
+	uncle->setColor(0); //Black
+	current = grandParent;
+      }
+      else {
+	//Case 2A: Current = right child of parent, rotate left
+	if (current == parent->getRight()) {
+	  //rotateLeft
+	  current = parent;
+	  parent = current->getParent();
+	}
+	//Case 3A: Current = left child of parent, rotate right
+	//rotateRight
+	//swap colors of parent and grandparent
+	int tempCol = parent->getColor();
+	parent->setColor(grandParent->getColor());
+	grandParent->setColor(tempCol);
+	current = parent;
+      }
+    }
+    //Case B: Parent = right child of grandparent
+    else {
+      Node* uncle = grandParent->getLeft();
+      //Case 1B: Uncle = red, only recolor
+      if (uncle != NULL && uncle->getColor() != 0) {
+	grandParent->setColor(1); //Red
+	parent->setColor(0); //Black
+	uncle->setColor(0); //Black
+	current = grandParent;
+      }
+      else {
+	//Case 2B: Current = left child of parent, rotate right
+	if (current == parent->getLeft()) {
+	  //rotateRight
+	  current = parent;
+	  parent = current->getParent();
+	}
+	//Case 3B: Current = right child of parent, rotate left
+	//rotateLeft
+	//swap color of parent and grandparent
+	int tempCol = parent->getColor();
+	parent->setColor(grandParent->getColor());
+	grandParent->setColor(tempCol);
+	current = parent;
+      }
+    }
+  }
+  head->setColor(0); //head is black
 }
