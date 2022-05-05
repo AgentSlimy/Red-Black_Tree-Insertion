@@ -1,4 +1,14 @@
-//https://www.geeksforgeeks.org/c-program-red-black-tree-insertion/
+//Author: Nathan Zou
+//Date: 5/8/22
+//Red Black Tree - Insertion, insert nodes into a Red Black Tree and print them out
+//Done with help from: Chris Zou and Stefan Ene
+/* Other resources used:
+   Previously completed Binary Search Tree: https://github.com/AgentSlimy/Binary-Search-Tree
+   Red-Black Tree Insertion: https://www.geeksforgeeks.org/red-black-tree-set-1-introduction-2/
+                             https://www.geeksforgeeks.org/c-program-red-black-tree-insertion/
+                             https://www.geeksforgeeks.org/red-black-tree-set-2-insert/
+   Tree Rotation: https://en.wikipedia.org/wiki/Tree_rotation
+*/
 
 #include <iostream>
 #include <cstring>
@@ -60,7 +70,7 @@ int main() {
       Node* previous = NULL;
       ADD(head, current, previous, value);
       if (current != head) {
-	//Balance
+	BALANCE(head, current);
       }
       cout << endl << value << " added to tree." << endl << endl;
     }
@@ -82,7 +92,7 @@ int main() {
   }
 }
 
-void ADD(Node* &head, Node* &current, Node*& previous, int value) {
+void ADD(Node* &head, Node* &current, Node*& previous, int value) { //Add function, manually add in a node
   if (head == NULL) {
     head = new Node();
     current = head;
@@ -98,7 +108,7 @@ void ADD(Node* &head, Node* &current, Node*& previous, int value) {
 	current->setData(value);
 	previous->setLeft(current);
 	current->setParent(previous);
-	//balance
+	BALANCE(head, current);
 	return;
       }
       else {
@@ -113,7 +123,7 @@ void ADD(Node* &head, Node* &current, Node*& previous, int value) {
 	current->setData(value);
 	previous->setRight(current);
 	current->setParent(previous);
-	//balance
+	BALANCE(head, current);
 	return;
       }
       else {
@@ -123,7 +133,7 @@ void ADD(Node* &head, Node* &current, Node*& previous, int value) {
   }
 }
 
-void FADD(Node* &head) {
+void FADD(Node* &head) { //File Add function, take in input from a file
   char input[10000];
   char fileName[100];
   int modify[100];
@@ -231,7 +241,7 @@ void PARSE(char* in, int* modify, int& count) { //Parse function, takes in input
     }
 }
 
-void BALANCE(Node* &head, Node* &current) {
+void BALANCE(Node* &head, Node* &current) { //Balance function, for Red-Black Tree properties
   Node* parent = NULL;
   Node* grandParent= NULL;
   while ((current != head) && (current->getColor() != 0) && ((current->getParent())->getColor() == 1)) {
@@ -250,12 +260,12 @@ void BALANCE(Node* &head, Node* &current) {
       else {
 	//Case 2A: Current = right child of parent, rotate left
 	if (current == parent->getRight()) {
-	  //rotateLeft
+	  rotateLeft(head, parent);
 	  current = parent;
 	  parent = current->getParent();
 	}
 	//Case 3A: Current = left child of parent, rotate right
-	//rotateRight
+	rotateRight(head, grandParent);
 	//swap colors of parent and grandparent
 	int tempCol = parent->getColor();
 	parent->setColor(grandParent->getColor());
@@ -276,12 +286,12 @@ void BALANCE(Node* &head, Node* &current) {
       else {
 	//Case 2B: Current = left child of parent, rotate right
 	if (current == parent->getLeft()) {
-	  //rotateRight
+	  rotateRight(head, parent);
 	  current = parent;
 	  parent = current->getParent();
 	}
 	//Case 3B: Current = right child of parent, rotate left
-	//rotateLeft
+	rotateLeft(head, grandParent);
 	//swap color of parent and grandparent
 	int tempCol = parent->getColor();
 	parent->setColor(grandParent->getColor());
@@ -291,4 +301,48 @@ void BALANCE(Node* &head, Node* &current) {
     }
   }
   head->setColor(0); //head is black
+}
+
+void rotateLeft(Node* &head, Node* &current) {
+  Node* rightPointer = current->getRight();
+  //Start rotation
+  current->setRight(rightPointer->getLeft());
+  if (current->getRight() != NULL) {
+    (current->getRight())->setParent(current);
+  }
+  rightPointer->setParent(current->getParent());
+  //If starting at head
+  if (current->getParent() == NULL) {
+    head = rightPointer;
+  }
+  else if (current == (current->getParent())->getLeft()) {
+    (current->getParent())->setLeft(rightPointer);
+  }
+  else {
+    (current->getParent())->setRight(rightPointer);
+  }
+  rightPointer->setLeft(current);
+  current->setParent(rightPointer);
+}
+
+void rotateRight(Node* &head, Node* &current) {
+  Node* leftPointer = current->getLeft();
+  //Start rotation
+  current->setLeft(leftPointer->getRight());
+  if (current->getLeft() != NULL) {
+    (current->getLeft())->setParent(current);
+  }
+  leftPointer->setParent(current->getParent());
+  //If starting at head
+  if (current->getParent() == NULL) {
+    head = leftPointer;
+  }
+  else if (current == (current->getParent())->getRight()) {
+    (current->getParent())->setLeft(leftPointer);
+  }
+  else {
+    (current->getParent())->setRight(leftPointer);
+  }
+  leftPointer->setRight(current);
+  current->setParent(leftPointer);
 }
